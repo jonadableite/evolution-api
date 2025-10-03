@@ -3,10 +3,10 @@ import { N8nDto } from '@api/integrations/chatbot/n8n/dto/n8n.dto';
 import { N8nService } from '@api/integrations/chatbot/n8n/services/n8n.service';
 import { PrismaRepository } from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
+import { IntegrationSession, N8n as N8nModel } from '@api/types/prisma.types';
 import { configService } from '@config/env.config';
 import { Logger } from '@config/logger.config';
 import { BadRequestException } from '@exceptions';
-import { IntegrationSession, N8n as N8nModel } from '@prisma/client';
 
 import { BaseChatbotController } from '../../base-chatbot.controller';
 

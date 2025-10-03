@@ -55,13 +55,16 @@ export class SendPresence extends Metadata {
 }
 
 export class SendStatusDto extends Metadata {
-  type: string;
+  type: 'text' | 'image' | 'video' | 'audio';
   content: string;
   statusJidList?: string[];
   allContacts?: boolean;
   caption?: string;
   backgroundColor?: string;
   font?: number;
+  media?: string;
+  mimetype?: string;
+  fileName?: string;
 }
 
 export class SendPollDto extends Metadata {

@@ -1,8 +1,8 @@
 import { PrismaRepository } from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
+import { Dify, DifySetting, IntegrationSession } from '@api/types/prisma.types';
 import { Integration } from '@api/types/wa.types';
 import { ConfigService, HttpServer } from '@config/env.config';
-import { Dify, DifySetting, IntegrationSession } from '@prisma/client';
 import axios from 'axios';
 import { isURL } from 'class-validator';
 

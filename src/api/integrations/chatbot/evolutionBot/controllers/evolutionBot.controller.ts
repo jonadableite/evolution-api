@@ -1,7 +1,7 @@
 import { PrismaRepository } from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
+import { EvolutionBot, IntegrationSession } from '@api/types/prisma.types';
 import { Logger } from '@config/logger.config';
-import { EvolutionBot, IntegrationSession } from '@prisma/client';
 
 import { BaseChatbotController } from '../../base-chatbot.controller';
 import { EvolutionBotDto } from '../dto/evolutionBot.dto';

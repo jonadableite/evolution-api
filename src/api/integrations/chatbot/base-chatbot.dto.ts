@@ -1,9 +1,4 @@
-import { TriggerOperator, TriggerType } from '@prisma/client';
-
-/**
- * Base DTO for all chatbot integrations
- * Contains common properties shared by all chatbot types
- */
+import { TriggerOperator, TriggerType } from '@api/types/prisma.types';
 export class BaseChatbotDto {
   enabled?: boolean;
   description: string;
@@ -22,10 +17,6 @@ export class BaseChatbotDto {
   splitMessages?: boolean;
   timePerChar?: number;
 }
-
-/**
- * Base settings DTO for all chatbot integrations
- */
 export class BaseChatbotSettingDto {
   expire?: number;
   keywordFinish?: string;
@@ -38,5 +29,5 @@ export class BaseChatbotSettingDto {
   ignoreJids?: any;
   splitMessages?: boolean;
   timePerChar?: number;
-  fallbackId?: string; // Unified fallback ID field for all integrations
+  fallbackId?: string;
 }

@@ -3,10 +3,10 @@ import { EvoaiDto } from '@api/integrations/chatbot/evoai/dto/evoai.dto';
 import { EvoaiService } from '@api/integrations/chatbot/evoai/services/evoai.service';
 import { PrismaRepository } from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
+import { Evoai as EvoaiModel, IntegrationSession } from '@api/types/prisma.types';
 import { configService, Evoai } from '@config/env.config';
 import { Logger } from '@config/logger.config';
 import { BadRequestException } from '@exceptions';
-import { Evoai as EvoaiModel, IntegrationSession } from '@prisma/client';
 
 import { BaseChatbotController } from '../../base-chatbot.controller';
 

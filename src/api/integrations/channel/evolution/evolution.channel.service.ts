@@ -5,6 +5,7 @@ import {
   SendAudioDto,
   SendButtonsDto,
   SendMediaDto,
+  SendStatusDto,
   SendTextDto,
 } from '@api/dto/sendMessage.dto';
 import * as s3Service from '@api/integrations/storage/s3/libs/minio.server';
@@ -12,6 +13,7 @@ import { PrismaRepository } from '@api/repository/repository.service';
 import { chatbotController } from '@api/server.module';
 import { CacheService } from '@api/services/cache.service';
 import { ChannelStartupService } from '@api/services/channel.service';
+import { StatusDeleteResponse, StatusListResponse, StatusPostResponse } from '@api/types/status.types';
 import { Events, wa } from '@api/types/wa.types';
 import { AudioConverter, Chatwoot, ConfigService, Openai, S3 } from '@config/env.config';
 import { BadRequestException, InternalServerErrorException } from '@exceptions';
@@ -765,8 +767,230 @@ export class EvolutionStartupService extends ChannelStartupService {
   public async pollMessage() {
     throw new BadRequestException('Method not available on Evolution Channel');
   }
-  public async statusMessage() {
-    throw new BadRequestException('Method not available on Evolution Channel');
+
+  public async statusMessage(data: SendStatusDto, file?: any): Promise<StatusPostResponse> {
+    try {
+      const { type, content, statusJidList, allContacts, caption, backgroundColor, font, media, mimetype, fileName } =
+        data;
+
+      if (!type || !content) {
+        throw new BadRequestException('Type and content are required for status message');
+      }
+
+      if (!['text', 'image', 'video', 'audio'].includes(type)) {
+        throw new BadRequestException('Invalid status type. Must be: text, image, video, or audio');
+      }
+
+      if (!allContacts && (!statusJidList || statusJidList.length === 0)) {
+        throw new BadRequestException(
+          'Either allContacts must be true or statusJidList must contain at least one contact',
+        );
+      }
+
+      if (statusJidList && statusJidList.length > 0) {
+        for (const jid of statusJidList) {
+          if (!this.validateJid(jid)) {
+            throw new BadRequestException(`Invalid JID format: ${jid}`);
+          }
+        }
+      }
+
+      let statusContent: any;
+      const timestamp = Date.now();
+
+      switch (type) {
+        case 'text':
+          statusContent = {
+            text: content,
+            backgroundColor: backgroundColor || '#000000',
+            font: font || 1,
+          };
+          break;
+
+        case 'image':
+        case 'video':
+        case 'audio': {
+          if (!media && !file) {
+            throw new BadRequestException(`Media is required for ${type} status`);
+          }
+
+          let mediaBuffer: Buffer;
+          let detectedMimetype = mimetype;
+
+          // Processar mídia (URL, base64 ou arquivo local)
+          if (file) {
+            mediaBuffer = file.buffer;
+            detectedMimetype = detectedMimetype || file.mimetype;
+          } else if (this.isURL(media || content)) {
+            try {
+              const response = await axios.get(media || content, { responseType: 'arraybuffer' });
+              mediaBuffer = Buffer.from(response.data);
+              detectedMimetype = detectedMimetype || response.headers['content-type'];
+            } catch (error) {
+              throw new BadRequestException(`Failed to fetch media from URL: ${error.message}`);
+            }
+          } else if ((media || content).startsWith('data:')) {
+            // Base64
+            const base64Data = (media || content).split(',')[1];
+            if (!base64Data) {
+              throw new BadRequestException('Invalid base64 format');
+            }
+            mediaBuffer = Buffer.from(base64Data, 'base64');
+
+            if (!detectedMimetype && (media || content).includes(';')) {
+              detectedMimetype = (media || content).split(';')[0].replace('data:', '');
+            }
+          } else {
+            // Base64 direto
+            mediaBuffer = Buffer.from(media || content, 'base64');
+          }
+
+          statusContent = {
+            [type]: mediaBuffer,
+            mimetype: detectedMimetype,
+            caption: caption || '',
+            fileName: fileName,
+          };
+          break;
+        }
+
+        default:
+          throw new BadRequestException(`Unsupported status type: ${type}`);
+      }
+
+      let recipients: string[] = [];
+      if (allContacts) {
+        const contacts = await this.prismaRepository.contact.findMany({
+          where: { instanceId: this.instanceId },
+          select: { remoteJid: true },
+        });
+        recipients = contacts.map((contact) => contact.remoteJid);
+      } else {
+        recipients = statusJidList || [];
+      }
+
+      const statusId = `status_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+
+      await this.prismaRepository.message.create({
+        data: {
+          key: {
+            remoteJid: 'status@broadcast',
+            fromMe: true,
+            id: statusId,
+          },
+          pushName: this.instance.name,
+          message: statusContent,
+          messageTimestamp: timestamp,
+          messageType: type,
+          instanceId: this.instanceId,
+        },
+      });
+
+      return {
+        success: true,
+        message: `Status ${type} sent successfully`,
+        statusId,
+        timestamp,
+        recipients: recipients.length > 0 ? recipients : undefined,
+      };
+    } catch (error) {
+      this.logger.error(`Error sending status message: ${error.message}`);
+      throw error;
+    }
+  }
+
+  public async fetchAllStatus(): Promise<StatusListResponse> {
+    try {
+      const statusMessages = await this.prismaRepository.message.findMany({
+        where: {
+          instanceId: this.instanceId,
+          key: {
+            path: ['remoteJid'],
+            equals: 'status@broadcast',
+          },
+        },
+        orderBy: {
+          messageTimestamp: 'desc',
+        },
+        take: 50,
+      });
+
+      const formattedStatus = statusMessages.map((msg) => ({
+        key: msg.key,
+        pushName: msg.pushName,
+        message: msg.message,
+        messageTimestamp: msg.messageTimestamp,
+        messageType: msg.messageType,
+      }));
+
+      return {
+        count: formattedStatus.length,
+        status: formattedStatus,
+      };
+    } catch (error) {
+      this.logger.error(`Error fetching status: ${error.message}`);
+      throw error;
+    }
+  }
+
+  public async deleteStatus(statusId: string): Promise<StatusDeleteResponse> {
+    try {
+      if (!statusId || typeof statusId !== 'string') {
+        throw new BadRequestException('Valid status ID is required');
+      }
+
+      // Buscar o status no banco
+      const statusMessage = await this.prismaRepository.message.findFirst({
+        where: {
+          instanceId: this.instanceId,
+          key: {
+            path: ['id'],
+            equals: statusId,
+          },
+        },
+      });
+
+      if (!statusMessage) {
+        throw new BadRequestException(`Status with ID ${statusId} not found`);
+      }
+
+      await this.prismaRepository.message.delete({
+        where: {
+          id: statusMessage.id,
+        },
+      });
+
+      return {
+        success: true,
+        message: 'Status deleted successfully',
+        deletedId: statusId,
+        timestamp: Date.now(),
+      };
+    } catch (error) {
+      this.logger.error(`Error deleting status: ${error.message}`);
+      throw error;
+    }
+  }
+
+  private validateJid(jid: string): boolean {
+    if (!jid || typeof jid !== 'string') return false;
+
+    const jidRegex = /^\d{10,15}@(s\.whatsapp\.net|c\.us)$/;
+    return jidRegex.test(jid);
+  }
+
+  private isURL(str: string): boolean {
+    try {
+      new URL(str);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  public hasValidMediaContent(messageRaw: any): boolean {
+    const mediaTypes = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage'];
+    return mediaTypes.includes(messageRaw.messageType) && (messageRaw.message.mediaUrl || messageRaw.message.base64);
   }
   public async reloadConnection() {
     throw new BadRequestException('Method not available on Evolution Channel');

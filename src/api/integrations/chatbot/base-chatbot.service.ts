@@ -1,10 +1,10 @@
 import { InstanceDto } from '@api/dto/instance.dto';
 import { PrismaRepository } from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
+import { IntegrationSession } from '@api/types/prisma.types';
 import { Integration } from '@api/types/wa.types';
 import { ConfigService } from '@config/env.config';
 import { Logger } from '@config/logger.config';
-import { IntegrationSession } from '@prisma/client';
 
 /**
  * Base class for all chatbot service implementations

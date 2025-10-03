@@ -3,10 +3,10 @@ import { OpenaiCredsDto, OpenaiDto } from '@api/integrations/chatbot/openai/dto/
 import { OpenaiService } from '@api/integrations/chatbot/openai/services/openai.service';
 import { PrismaRepository } from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
+import { IntegrationSession, OpenaiBot } from '@api/types/prisma.types';
 import { configService, Openai } from '@config/env.config';
 import { Logger } from '@config/logger.config';
 import { BadRequestException } from '@exceptions';
-import { IntegrationSession, OpenaiBot } from '@prisma/client';
 import OpenAI from 'openai';
 
 import { BaseChatbotController } from '../../base-chatbot.controller';

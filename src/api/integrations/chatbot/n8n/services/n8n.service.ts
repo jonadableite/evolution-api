@@ -1,7 +1,7 @@
 import { PrismaRepository } from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
+import { IntegrationSession, N8n, N8nSetting } from '@api/types/prisma.types';
 import { ConfigService, HttpServer } from '@config/env.config';
-import { IntegrationSession, N8n, N8nSetting } from '@prisma/client';
 import axios from 'axios';
 
 import { BaseChatbotService } from '../../base-chatbot.service';

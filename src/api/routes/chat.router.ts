@@ -18,7 +18,7 @@ import {
 import { InstanceDto } from '@api/dto/instance.dto';
 import { Query } from '@api/repository/repository.service';
 import { chatController } from '@api/server.module';
-import { Contact, Message, MessageUpdate } from '@prisma/client';
+import { Contact, Message, MessageUpdate } from '@api/types/prisma.types';
 import {
   archiveChatSchema,
   blockUserSchema,

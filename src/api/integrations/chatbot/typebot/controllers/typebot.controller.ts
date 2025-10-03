@@ -3,11 +3,11 @@ import { TypebotDto } from '@api/integrations/chatbot/typebot/dto/typebot.dto';
 import { TypebotService } from '@api/integrations/chatbot/typebot/services/typebot.service';
 import { PrismaRepository } from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
+import { IntegrationSession, Typebot as TypebotModel } from '@api/types/prisma.types';
 import { Events } from '@api/types/wa.types';
 import { configService, Typebot } from '@config/env.config';
 import { Logger } from '@config/logger.config';
 import { BadRequestException } from '@exceptions';
-import { IntegrationSession, Typebot as TypebotModel } from '@prisma/client';
 import axios from 'axios';
 
 import { BaseChatbotController } from '../../base-chatbot.controller';

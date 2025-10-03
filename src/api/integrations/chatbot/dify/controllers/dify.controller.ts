@@ -3,10 +3,10 @@ import { DifyDto } from '@api/integrations/chatbot/dify/dto/dify.dto';
 import { DifyService } from '@api/integrations/chatbot/dify/services/dify.service';
 import { PrismaRepository } from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
+import { Dify as DifyModel, IntegrationSession } from '@api/types/prisma.types';
 import { configService, Dify } from '@config/env.config';
 import { Logger } from '@config/logger.config';
 import { BadRequestException } from '@exceptions';
-import { Dify as DifyModel, IntegrationSession } from '@prisma/client';
 
 import { BaseChatbotController } from '../../base-chatbot.controller';
 

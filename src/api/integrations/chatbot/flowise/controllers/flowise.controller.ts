@@ -1,10 +1,10 @@
 import { InstanceDto } from '@api/dto/instance.dto';
 import { PrismaRepository } from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
+import { Flowise as FlowiseModel, IntegrationSession } from '@api/types/prisma.types';
 import { configService, Flowise } from '@config/env.config';
 import { Logger } from '@config/logger.config';
 import { BadRequestException } from '@exceptions';
-import { Flowise as FlowiseModel, IntegrationSession } from '@prisma/client';
 
 import { BaseChatbotController } from '../../base-chatbot.controller';
 import { FlowiseDto } from '../dto/flowise.dto';

@@ -8,11 +8,11 @@ import { OpenaiService } from '@api/integrations/chatbot/openai/services/openai.
 import { TypebotService } from '@api/integrations/chatbot/typebot/services/typebot.service';
 import { PrismaRepository, Query } from '@api/repository/repository.service';
 import { eventManager, waMonitor } from '@api/server.module';
+import { Contact, ContactFindManyArgs, Message, Prisma } from '@api/types/prisma.types';
 import { Events, wa } from '@api/types/wa.types';
 import { Auth, Chatwoot, ConfigService, HttpServer, Proxy } from '@config/env.config';
 import { Logger } from '@config/logger.config';
 import { NotFoundException } from '@exceptions';
-import { Contact, Message, Prisma } from '@prisma/client';
 import { createJid } from '@utils/createJid';
 import { WASocket } from 'baileys';
 import { isArray } from 'class-validator';
@@ -504,7 +504,7 @@ export class ChannelStartupService {
       where['remoteJid'] = remoteJid;
     }
 
-    const contactFindManyArgs: Prisma.ContactFindManyArgs = {
+    const contactFindManyArgs: ContactFindManyArgs = {
       where,
     };
 

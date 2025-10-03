@@ -10,8 +10,8 @@ import {
   typebotController,
 } from '@api/server.module';
 import { WAMonitoringService } from '@api/services/monitor.service';
+import { IntegrationSession } from '@api/types/prisma.types';
 import { Logger } from '@config/logger.config';
-import { IntegrationSession } from '@prisma/client';
 import { findBotByTrigger } from '@utils/findBotByTrigger';
 
 export type EmitData = {

@@ -2,10 +2,10 @@ import { IgnoreJidDto } from '@api/dto/chatbot.dto';
 import { InstanceDto } from '@api/dto/instance.dto';
 import { PrismaRepository } from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
+import { TriggerOperator, TriggerType } from '@api/types/prisma.types';
 import { Events } from '@api/types/wa.types';
 import { Logger } from '@config/logger.config';
 import { BadRequestException } from '@exceptions';
-import { TriggerOperator, TriggerType } from '@prisma/client';
 import { getConversationMessage } from '@utils/getConversationMessage';
 
 import { BaseChatbotDto } from './base-chatbot.dto';
